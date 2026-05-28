@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zylo Lab — Cockpit interne</title>
+<meta name="application-name" content="Zylo Lab">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Zylo Lab">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#07070d">
+<meta name="description" content="Cockpit interne Zylo Lab — Gestion des avis Google">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='36' fill='%2307070d'/%3E%3Crect x='0' y='0' width='192' height='4' rx='2' fill='%2300e5a0'/%3E%3Ctext x='96' y='145' text-anchor='middle' font-size='140' font-family='Arial Black,sans-serif' font-weight='900' fill='%2300e5a0'%3EZ%3C/text%3E%3Ctext x='148' y='175' text-anchor='middle' font-size='20' font-family='Arial,sans-serif' font-weight='700' fill='%2300e5a0' opacity='0.4'%3ELAB%3C/text%3E%3C/svg%3E">
+<link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22Zylo%20Lab%20%E2%80%94%20Cockpit%22%2C%22short_name%22%3A%22Zylo%20Lab%22%2C%22description%22%3A%22Gestion%20des%20avis%20Google%20clients%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%2307070d%22%2C%22theme_color%22%3A%22%2307070d%22%2C%22orientation%22%3A%22portrait-primary%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%2520xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%2520viewBox%3D'0%25200%2520192%2520192'%253E%253Crect%2520width%3D'192'%2520height%3D'192'%2520rx%3D'40'%2520fill%3D'%252307070d'%2F%253E%253Ctext%2520x%3D'96'%2520y%3D'120'%2520text-anchor%3D'middle'%2520font-size%3D'80'%2520fill%3D'%252300e5a0'%253E%25E2%2598%2585%253C%2Ftext%253E%253C%2Fsvg%253E%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%7D%5D%7D">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#07070d;--s1:#0f0f18;--s2:#16161f;--s3:#1e1e2a;--s4:#262633;
+  --accent:#00e5a0;--accent-dim:rgba(0,229,160,0.1);
+  --red:#ff3b5c;--red-dim:rgba(255,59,92,0.1);
+  --gold:#f5c842;--gold-dim:rgba(245,200,66,0.1);
+  --blue:#4f8ef7;--text:#ededf5;--muted:#5a5870;
+  --border:rgba(255,255,255,0.05);--border2:rgba(255,255,255,0.09);
+}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;display:flex;flex-direction:column}
+.topbar{height:52px;flex-shrink:0;background:var(--s1);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:20px;z-index:100;}
+.topbar-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:17px;letter-spacing:-.5px;display:flex;align-items:center;gap:8px}
+.topbar-logo .dot{width:8px;height:8px;background:var(--accent);border-radius:50%}
+.topbar-tabs{display:flex;gap:2px;margin-left:20px}
+.tab{padding:6px 16px;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;color:var(--muted);transition:all .2s;border:none;background:none}
+.tab:hover{color:var(--text);background:var(--s3)}
+.tab.active{color:var(--accent);background:var(--accent-dim)}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.status-pill{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--accent);background:var(--accent-dim);padding:5px 12px;border-radius:100px}
+.demo-pill{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--gold);background:var(--gold-dim);padding:5px 12px;border-radius:100px;border:1px solid rgba(245,200,66,.2)}
+.live-dot{width:6px;height:6px;background:var(--accent);border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.2}}
+.workspace{flex:1;display:flex;overflow:hidden}
+.sidebar{width:220px;flex-shrink:0;background:var(--s1);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;}
+.sidebar-section{padding:16px 12px 8px;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted)}
+.client-item{margin:2px 8px;border-radius:8px;padding:10px 12px;cursor:pointer;transition:background .2s;position:relative;}
+.client-item:hover{background:var(--s3)}
+.client-item.active{background:var(--accent-dim);border:1px solid rgba(0,229,160,.15)}
+.client-name{font-size:13px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.client-meta{font-size:11px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.client-badge{position:absolute;top:10px;right:10px;background:var(--red);color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:100px;min-width:18px;text-align:center;}
+.client-badge.zero{background:var(--accent-dim);color:var(--accent)}
+.add-client-btn{margin:8px;padding:10px 12px;border-radius:8px;border:1px dashed var(--border2);background:none;color:var(--muted);font-size:13px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:all .2s;font-family:'DM Sans',sans-serif;}
+.add-client-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-dim)}
+.content{flex:1;overflow-y:auto;display:flex;flex-direction:column}
+.view{display:none;flex:1;flex-direction:column}
+.view.active{display:flex}
+.dash-header{padding:28px 32px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+.dash-title{font-family:'Syne',sans-serif;font-weight:800;font-size:22px;letter-spacing:-.5px}
+.dash-title span{color:var(--accent)}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:20px 32px}
+.kpi{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:18px 20px}
+.kpi-label{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.kpi-val{font-family:'Syne',sans-serif;font-weight:800;font-size:30px;line-height:1;letter-spacing:-1px}
+.kpi-val.g{color:var(--accent)}.kpi-val.r{color:var(--red)}.kpi-val.y{color:var(--gold)}
+.kpi-sub{font-size:11px;color:var(--muted);margin-top:6px}
+.clients-table{margin:0 32px 32px;border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.ct-head{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr 120px;background:var(--s2);border-bottom:1px solid var(--border);padding:12px 20px;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)}
+.ct-row{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr 120px;padding:14px 20px;border-bottom:1px solid var(--border);align-items:center;transition:background .2s;cursor:pointer}
+.ct-row:last-child{border-bottom:none}
+.ct-row:hover{background:var(--s2)}
+.ct-cell{font-size:13px}
+.ct-name{font-weight:600;color:var(--text)}
+.ct-sector{color:var(--muted);font-size:12px}
+.badge-pending{background:var(--red-dim);color:var(--red);padding:3px 10px;border-radius:100px;font-size:11px;font-weight:600;display:inline-block}
+.badge-ok{background:var(--accent-dim);color:var(--accent);padding:3px 10px;border-radius:100px;font-size:11px;font-weight:600;display:inline-block}
+.badge-warn{background:var(--gold-dim);color:var(--gold);padding:3px 10px;border-radius:100px;font-size:11px;font-weight:600;display:inline-block}
+.stars-small{color:var(--gold);font-size:12px}
+.ct-action{display:flex;gap:6px}
+.mini-btn{padding:6px 12px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;border:none;font-family:'Syne',sans-serif;transition:all .15s}
+.mini-btn.primary{background:var(--accent);color:#07070d}
+.mini-btn.ghost{background:var(--s3);color:var(--text);border:1px solid var(--border)}
+.mini-btn:hover{transform:translateY(-1px)}
+.client-header{padding:24px 32px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+.client-header-info{flex:1}
+.client-header-name{font-family:'Syne',sans-serif;font-weight:800;font-size:20px;letter-spacing:-.5px}
+.client-header-meta{font-size:13px;color:var(--muted);margin-top:3px}
+.client-header-stats{display:flex;gap:20px}
+.ch-stat{text-align:center}
+.ch-stat-val{font-family:'Syne',sans-serif;font-weight:800;font-size:22px;line-height:1}
+.ch-stat-val.g{color:var(--accent)}.ch-stat-val.y{color:var(--gold)}
+.ch-stat-label{font-size:10px;color:var(--muted);margin-top:3px;letter-spacing:1px;text-transform:uppercase}
+.client-body{display:grid;grid-template-columns:1fr 300px;flex:1;overflow:hidden}
+.reviews-panel{padding:20px 24px;overflow-y:auto;border-right:1px solid var(--border)}
+.right-panel{overflow-y:auto;background:var(--s1)}
+.r-item{background:var(--s2);border:1px solid var(--border);border-radius:10px;margin-bottom:10px;overflow:hidden;transition:border-color .3s;}
+.r-item.neg{border-left:3px solid var(--red)}.r-item.pos{border-left:3px solid var(--accent)}.r-item.mid{border-left:3px solid var(--gold)}.r-item.done{border-left:3px solid var(--s4);opacity:.7}
+.r-top{display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer}
+.r-avatar{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:13px;flex-shrink:0}
+.r-info{flex:1;min-width:0}
+.r-author{font-size:13px;font-weight:600}
+.r-date{font-size:11px;color:var(--muted)}
+.r-stars-date{display:flex;align-items:center;gap:8px}
+.r-status-chip{font-size:10px;font-weight:700;padding:3px 10px;border-radius:100px;letter-spacing:.5px;text-transform:uppercase;flex-shrink:0}
+.chip-wait{background:rgba(245,200,66,.1);color:var(--gold)}.chip-done{background:var(--accent-dim);color:var(--accent)}.chip-neg{background:var(--red-dim);color:var(--red)}
+.r-body{padding:0 16px 14px;display:none}
+.r-body.open{display:block}
+.r-text{font-size:13px;color:rgba(237,237,245,.65);line-height:1.8;font-weight:300;padding:12px 14px;background:var(--s3);border-radius:6px;margin-bottom:12px}
+.loading-strip{height:2px;background:var(--s4);border-radius:1px;margin-bottom:10px;display:none;overflow:hidden}
+.loading-strip.on{display:block}
+.loading-fill{height:100%;background:linear-gradient(90deg,var(--accent),transparent);animation:sweep 1.2s ease infinite}
+@keyframes sweep{0%{transform:translateX(-100%)}100%{transform:translateX(200%)}}
+.r-response{background:var(--s1);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px;display:none}
+.r-response.open{display:block}
+.r-response-label{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:8px}
+.r-response-text{font-size:13px;line-height:1.8;color:var(--text);font-weight:300;white-space:pre-wrap}
+.r-response-text.typing::after{content:'▋';animation:pulse 1s infinite;color:var(--accent)}
+.r-actions{display:flex;gap:6px;flex-wrap:wrap}
+.ra-btn{padding:7px 14px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;border:none;font-family:'Syne',sans-serif;transition:all .15s;display:flex;align-items:center;gap:5px}
+.ra-btn:hover{transform:translateY(-1px)}
+.ra-publish{background:var(--accent);color:#07070d}.ra-regen{background:var(--s3);color:var(--text);border:1px solid var(--border)}.ra-edit{background:transparent;color:var(--muted);border:1px solid var(--border)}.ra-generate{background:var(--accent-dim);color:var(--accent);border:1px solid rgba(0,229,160,.2)}.ra-delete{background:var(--red-dim);color:var(--red);border:none}
+.rp-section{padding:20px;border-bottom:1px solid var(--border)}
+.rp-title{font-family:'Syne',sans-serif;font-weight:700;font-size:13px;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.rp-title::before{content:'';width:3px;height:14px;background:var(--accent);border-radius:2px;flex-shrink:0}
+.form-row{margin-bottom:12px}
+.form-lbl{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;display:block}
+.form-inp,.form-sel,.form-ta{width:100%;background:var(--s2);border:1px solid var(--border);border-radius:7px;padding:9px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;outline:none;transition:border-color .2s;}
+.form-inp:focus,.form-sel:focus,.form-ta:focus{border-color:rgba(0,229,160,.35)}
+.form-ta{height:80px;resize:none;line-height:1.6}
+.form-sel option{background:#16161f}
+.save-btn{width:100%;padding:10px;background:var(--accent);color:#07070d;border:none;border-radius:7px;font-family:'Syne',sans-serif;font-weight:700;font-size:13px;cursor:pointer;transition:opacity .2s}
+.save-btn:hover{opacity:.88}
+.hist-item{padding:12px 16px;border-bottom:1px solid var(--border);font-size:12px}
+.hist-author{font-weight:600;color:var(--text);margin-bottom:3px}
+.hist-resp{color:var(--muted);line-height:1.6;font-size:11px;font-weight:300;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.hist-date{font-size:10px;color:var(--muted);margin-top:4px;letter-spacing:.5px}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.modal-bg.open{display:flex}
+.modal{background:var(--s2);border:1px solid var(--border2);border-radius:16px;padding:32px;width:480px;max-width:95vw}
+.modal-title{font-family:'Syne',sans-serif;font-weight:800;font-size:18px;margin-bottom:6px}
+.modal-sub{font-size:13px;color:var(--muted);margin-bottom:24px}
+.modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.modal-full{grid-column:1/-1}
+.modal-actions{display:flex;gap:10px;margin-top:20px;justify-content:flex-end}
+.modal-cancel{padding:10px 20px;background:var(--s3);color:var(--text);border:1px solid var(--border);border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px}
+.modal-save{padding:10px 24px;background:var(--accent);color:#07070d;border:none;border-radius:8px;cursor:pointer;font-family:'Syne',sans-serif;font-weight:700;font-size:13px}
+.toast{position:fixed;bottom:20px;right:20px;z-index:999;background:var(--s2);border:1px solid var(--border2);border-radius:10px;padding:12px 18px;font-size:13px;display:flex;align-items:center;gap:8px;transform:translateY(60px);opacity:0;transition:all .3s;box-shadow:0 8px 32px rgba(0,0,0,.4);pointer-events:none}
+.toast.show{transform:translateY(0);opacity:1}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--s4);border-radius:2px}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-logo"><div class="dot"></div>ZYLO LAB</div>
+  <div class="topbar-tabs">
+    <button class="tab active" onclick="showView('dashboard',this)">Vue globale</button>
+    <button class="tab" id="tab-client" style="display:none" onclick="showView('client',this)">Client actif</button>
+  </div>
+  <div class="topbar-right">
+    <div class="demo-pill">✦ Mode démo</div>
+    <div class="status-pill"><div class="live-dot"></div> Outil interne actif</div>
+  </div>
+</div>
+
+<div class="workspace">
+  <aside class="sidebar">
+    <div class="sidebar-section">Clients</div>
+    <div id="clientsList"></div>
+    <button class="add-client-btn" onclick="openModal()">＋ Ajouter un client</button>
+  </aside>
+  <div class="content">
+
+    <div class="view active" id="view-dashboard">
+      <div class="dash-header">
+        <div>
+          <div class="dash-title">Tableau de bord <span>Zylo Lab</span></div>
+          <div style="font-size:13px;color:var(--muted);margin-top:3px">Vue globale de tous vos clients</div>
+        </div>
+        <button class="mini-btn primary" onclick="openModal()">＋ Nouveau client</button>
+      </div>
+      <div class="kpi-row">
+        <div class="kpi"><div class="kpi-label">Clients actifs</div><div class="kpi-val g" id="kpi-clients">0</div><div class="kpi-sub">Portefeuille total</div></div>
+        <div class="kpi"><div class="kpi-label">Avis en attente</div><div class="kpi-val r" id="kpi-pending">0</div><div class="kpi-sub">À traiter</div></div>
+        <div class="kpi"><div class="kpi-label">Réponses publiées</div><div class="kpi-val g" id="kpi-published">0</div><div class="kpi-sub">Total historique</div></div>
+        <div class="kpi"><div class="kpi-label">Taux de réponse</div><div class="kpi-val y" id="kpi-rate">—</div><div class="kpi-sub">Moyenne portefeuille</div></div>
+      </div>
+      <div class="clients-table">
+        <div class="ct-head"><div>Client</div><div>Note</div><div>Avis total</div><div>En attente</div><div>Statut</div><div>Actions</div></div>
+        <div id="dashTable"></div>
+      </div>
+    </div>
+
+    <div class="view" id="view-client">
+      <div class="client-header">
+        <div class="client-header-info">
+          <div class="client-header-name" id="ch-name">—</div>
+          <div class="client-header-meta" id="ch-meta">—</div>
+        </div>
+        <div class="client-header-stats">
+          <div class="ch-stat"><div class="ch-stat-val y" id="ch-note">—</div><div class="ch-stat-label">Note</div></div>
+          <div class="ch-stat"><div class="ch-stat-val" id="ch-total">—</div><div class="ch-stat-label">Avis</div></div>
+          <div class="ch-stat"><div class="ch-stat-val r" id="ch-pending">—</div><div class="ch-stat-label">En attente</div></div>
+          <div class="ch-stat"><div class="ch-stat-val g" id="ch-published">—</div><div class="ch-stat-label">Publiées</div></div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="mini-btn ghost" onclick="addFakeReview()">＋ Simuler un avis</button>
+          <button class="mini-btn primary" onclick="generateAllPending()">✦ Tout générer</button>
+        </div>
+      </div>
+      <div class="client-body">
+        <div class="reviews-panel" id="reviewsPanel">
+          <div style="font-size:12px;color:var(--muted);margin-bottom:14px;letter-spacing:.5px">AVIS REÇUS</div>
+          <div id="reviewItems"></div>
+        </div>
+        <div class="right-panel">
+          <div class="rp-section">
+            <div class="rp-title">Configuration IA</div>
+            <div class="form-row"><label class="form-lbl">Établissement</label><input class="form-inp" id="cfg-name"></div>
+            <div class="form-row"><label class="form-lbl">Secteur</label><input class="form-inp" id="cfg-sector"></div>
+            <div class="form-row"><label class="form-lbl">Ton des réponses</label>
+              <select class="form-sel" id="cfg-tone">
+                <option value="chaleureux">Chaleureux et sincère</option>
+                <option value="professionnel">Professionnel et sobre</option>
+                <option value="enthousiaste">Enthousiaste et dynamique</option>
+                <option value="empathique">Empathique et à l'écoute</option>
+              </select>
+            </div>
+            <div class="form-row"><label class="form-lbl">Instructions spécifiques</label><textarea class="form-ta" id="cfg-instructions" placeholder="Ex: toujours mentionner le RDV en ligne, signer avec le prénom..."></textarea></div>
+            <button class="save-btn" onclick="saveClientConfig()">Enregistrer</button>
+          </div>
+          <div class="rp-section">
+            <div class="rp-title">Historique publié</div>
+            <div id="historyList" style="font-size:12px;color:var(--muted);padding:8px 0">Aucune réponse publiée</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <div class="modal-title">Nouveau client</div>
+    <div class="modal-sub">Ajoutez un client à votre portefeuille Zylo Lab</div>
+    <div class="modal-grid">
+      <div class="form-row"><label class="form-lbl">Nom complet / Enseigne</label><input class="form-inp" id="new-name" placeholder="Ex: Joël Spisser"></div>
+      <div class="form-row"><label class="form-lbl">Secteur d'activité</label><input class="form-inp" id="new-sector" placeholder="Ex: Acupuncture"></div>
+      <div class="form-row"><label class="form-lbl">Ville</label><input class="form-inp" id="new-city" placeholder="Ex: Haguenau"></div>
+      <div class="form-row"><label class="form-lbl">Note Google actuelle</label><input class="form-inp" id="new-note" placeholder="Ex: 4.7" type="number" step="0.1" min="1" max="5"></div>
+      <div class="form-row modal-full"><label class="form-lbl">Ton souhaité</label>
+        <select class="form-sel" id="new-tone">
+          <option value="chaleureux">Chaleureux et sincère</option>
+          <option value="professionnel">Professionnel et sobre</option>
+          <option value="enthousiaste">Enthousiaste et dynamique</option>
+          <option value="empathique">Empathique et à l'écoute</option>
+        </select>
+      </div>
+      <div class="form-row modal-full"><label class="form-lbl">Instructions IA spécifiques</label><textarea class="form-ta" id="new-instructions" placeholder="Ex: toujours mentionner le RDV en ligne, signer avec le prénom..."></textarea></div>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeModal()">Annuler</button>
+      <button class="modal-save" onclick="saveNewClient()">Créer le client</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"><span id="ti">✓</span><span id="tm">OK</span></div>
+
+<script>
+const STORAGE_KEY = 'zylolab_v2';
+function loadData(){try{const r=localStorage.getItem(STORAGE_KEY);if(r)return JSON.parse(r);}catch(e){}return{clients:[],nextClientId:1,nextReviewId:100};}
+function saveData(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(db));}catch(e){}}
+let db=loadData();
+let activeClientId=null;
+
+if(db.clients.length===0){
+  db.clients.push({id:1,name:"Joël Spisser",sector:"Acupuncture",city:"Haguenau",note:4.7,tone:"chaleureux",instructions:"Toujours mentionner la prise de RDV en ligne via Calendly. Signer avec 'Joël' seulement. Pour les avis négatifs, proposer un contact direct.",reviews:[
+    {id:1,author:"Michel Ritter",date:"Il y a 2h",stars:5,text:"Tendinite au coude depuis 8 mois, kiné et ostéo n'avaient rien changé. Dès la première séance avec Joël, j'ai senti une vraie différence. En 3 séances, la douleur avait pratiquement disparu. Je recommande les yeux fermés.",status:"pending",response:""},
+    {id:2,author:"Sandra Koenig",date:"Il y a 5h",stars:2,text:"J'ai pris rendez-vous mais le praticien avait 30 minutes de retard sans prévenir. La séance en elle-même était correcte mais je m'attendais à mieux pour le prix. Je ne suis pas sûre de revenir.",status:"pending",response:""},
+    {id:3,author:"Françoise Muller",date:"Hier",stars:4,text:"Très bonne expérience. Joël est professionnel, à l'écoute, et le déplacement à domicile est vraiment un grand plus. Ma lombalgie a bien diminué après 2 séances.",status:"pending",response:""}
+  ]});
+  db.nextClientId=2;db.nextReviewId=10;saveData();
+}
+
+// ── DÉMO : réponses simulées selon le ton et les étoiles ──
+const demoResponses = {
+  pos: {
+    chaleureux: [
+      "Merci infiniment pour ce retour qui me touche vraiment, {author} ! C'est exactement pour des moments comme celui-ci que je me lève chaque matin. Ravie que les séances aient porté leurs fruits — n'hésitez pas à réserver en ligne via Calendly pour votre prochain rendez-vous. À très vite ! Joël",
+      "Quel beau message, {author}, merci du fond du cœur ! Votre confiance est ma plus belle récompense. Je suis heureux que nous ayons pu avancer ensemble sur ce chemin. La porte reste ouverte — pensez à Calendly pour la prochaine fois. Joël",
+      "Merci pour ces mots chaleureux, {author} ! Chaque patient est unique et c'est toujours un privilège d'accompagner cette progression. Au plaisir de vous retrouver — les créneaux sont disponibles sur Calendly. Joël"
+    ],
+    professionnel: [
+      "Merci pour votre retour, {author}. Je suis heureux que la prise en charge ait répondu à vos attentes. N'hésitez pas à prendre rendez-vous via Calendly pour la suite de votre suivi.",
+      "Je vous remercie pour ce témoignage, {author}. C'est une satisfaction de constater des résultats concrets. Pour tout prochain rendez-vous, Calendly reste le canal le plus rapide.",
+      "Merci, {author}. Votre satisfaction est notre priorité. Pour la suite, les créneaux disponibles sont accessibles directement sur Calendly."
+    ],
+    enthousiaste: [
+      "Waouh merci {author} ! 🙏 Ces retours nous portent vraiment ! Tellement content que l'expérience ait été à la hauteur. On vous attend avec plaisir pour la prochaine séance — réservez vite sur Calendly, les créneaux partent vite ! Joël",
+      "Merci {author}, vous nous faites vraiment plaisir ! C'est exactement cette énergie qui nous motive chaque jour. À très bientôt sur Calendly pour la suite de l'aventure ! Joël"
+    ],
+    empathique: [
+      "Merci pour ce partage sincère, {author}. Savoir que vous êtes reparti mieux qu'à l'arrivée, c'est ce qui compte le plus pour moi. Je reste disponible si besoin — Calendly est là pour faciliter la prise de RDV. Joël",
+      "Votre retour me touche, {author}. Chaque parcours est différent et je suis heureux d'avoir pu contribuer au vôtre. N'hésitez pas à revenir, je suis là. Joël"
+    ]
+  },
+  neg: {
+    chaleureux: [
+      "Merci d'avoir pris le temps de partager votre expérience, {author}, même si elle n'a pas été à la hauteur de vos attentes. Je suis sincèrement désolé pour ce retard et le manque de communication — ce n'est pas le service que vous méritez. Je serais heureux d'en discuter directement avec vous pour trouver une solution. N'hésitez pas à me contacter. Joël",
+      "Je vous remercie pour votre honnêteté, {author}. Je comprends votre déception et je la prends très au sérieux. Un retard sans prévenir n'est pas acceptable et je m'en excuse. Si vous souhaitez me donner une seconde chance, contactez-moi directement — je ferai en sorte que l'expérience soit différente. Joël"
+    ],
+    professionnel: [
+      "Merci pour votre retour, {author}. Nous prenons note de vos remarques concernant le délai d'attente. Ce type de situation n'est pas représentatif de notre fonctionnement habituel. N'hésitez pas à nous contacter directement afin d'échanger sur votre expérience.",
+      "Je vous remercie pour ce retour, {author}. Vos remarques sont importantes et nous permettent de nous améliorer. Je reste disponible si vous souhaitez en discuter de vive voix."
+    ],
+    empathique: [
+      "Merci {author} d'avoir partagé votre ressenti. Je comprends parfaitement votre frustration face à ce retard — votre temps est précieux et vous méritez mieux. Je suis vraiment navré. Si vous souhaitez qu'on en parle, contactez-moi directement. Joël",
+      "Je reçois votre message avec beaucoup d'attention, {author}. Votre déception est légitime et je m'en excuse sincèrement. Je reste à votre disposition pour échanger et, si vous le souhaitez, trouver ensemble une façon de rattraper cette mauvaise expérience. Joël"
+    ],
+    enthousiaste: [
+      "Merci {author} pour votre transparence. Je suis vraiment désolé pour cette expérience décevante — ce n'est absolument pas ce qu'on veut vous faire vivre ! On va faire mieux, promis. Contactez-moi directement et on en parle. Joël"
+    ]
+  }
+};
+
+function getDemoResponse(review, client) {
+  const isNeg = review.stars <= 2;
+  const pool = isNeg ? demoResponses.neg : demoResponses.pos;
+  const tone = client.tone || 'chaleureux';
+  const responses = pool[tone] || pool['chaleureux'];
+  const template = responses[Math.floor(Math.random() * responses.length)];
+  return template.replace(/{author}/g, review.author.split(' ')[0]);
+}
+
+function showView(name,btn){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+name).classList.add('active');
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  if(name==='dashboard')renderDashboard();
+}
+
+function renderSidebar(){
+  const list=document.getElementById('clientsList');
+  list.innerHTML=db.clients.map(c=>{
+    const pending=c.reviews.filter(r=>r.status==='pending').length;
+    return `<div class="client-item${c.id===activeClientId?' active':''}" onclick="openClient(${c.id})">
+      <div class="client-name">${c.name}</div>
+      <div class="client-meta">${c.sector} · ${c.city}</div>
+      ${pending>0?`<div class="client-badge">${pending}</div>`:`<div class="client-badge zero">✓</div>`}
+    </div>`;
+  }).join('');
+}
+
+function renderDashboard(){
+  const total=db.clients.length;
+  const pending=db.clients.reduce((s,c)=>s+c.reviews.filter(r=>r.status==='pending').length,0);
+  const published=db.clients.reduce((s,c)=>s+c.reviews.filter(r=>r.status==='done').length,0);
+  const totalReviews=db.clients.reduce((s,c)=>s+c.reviews.length,0);
+  const rate=totalReviews>0?Math.round((published/totalReviews)*100)+'%':'—';
+  document.getElementById('kpi-clients').textContent=total;
+  document.getElementById('kpi-pending').textContent=pending;
+  document.getElementById('kpi-published').textContent=published;
+  document.getElementById('kpi-rate').textContent=rate;
+  const table=document.getElementById('dashTable');
+  if(db.clients.length===0){table.innerHTML='<div style="padding:32px;text-align:center;color:var(--muted);font-size:13px">Aucun client — ajoutez votre premier client</div>';return;}
+  table.innerHTML=db.clients.map(c=>{
+    const p=c.reviews.filter(r=>r.status==='pending').length;
+    const statusEl=p>0?`<span class="badge-pending">${p} en attente</span>`:`<span class="badge-ok">✓ À jour</span>`;
+    const stars='★'.repeat(Math.round(c.note))+'☆'.repeat(5-Math.round(c.note));
+    return `<div class="ct-row" onclick="openClient(${c.id})">
+      <div class="ct-cell"><div class="ct-name">${c.name}</div><div class="ct-sector">${c.sector} · ${c.city}</div></div>
+      <div class="ct-cell"><span class="stars-small">${stars}</span> <span style="font-size:12px;color:var(--muted)">${c.note}</span></div>
+      <div class="ct-cell" style="color:var(--muted)">${c.reviews.length}</div>
+      <div class="ct-cell">${statusEl}</div>
+      <div class="ct-cell">${p>0?'<span class="badge-warn">Actif</span>':'<span class="badge-ok">OK</span>'}</div>
+      <div class="ct-cell ct-action">
+        <button class="mini-btn primary" onclick="event.stopPropagation();openClient(${c.id})">Gérer</button>
+        <button class="mini-btn ghost" onclick="event.stopPropagation();deleteClient(${c.id})">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openClient(id){
+  activeClientId=id;
+  const c=db.clients.find(x=>x.id===id);
+  if(!c)return;
+  document.getElementById('tab-client').style.display='';
+  document.getElementById('tab-client').textContent=c.name;
+  showView('client',document.getElementById('tab-client'));
+  document.getElementById('ch-name').textContent=c.name;
+  document.getElementById('ch-meta').textContent=c.sector+' · '+c.city;
+  const stars='★'.repeat(Math.round(c.note))+'☆'.repeat(5-Math.round(c.note));
+  document.getElementById('ch-note').textContent=stars+' '+c.note;
+  document.getElementById('ch-total').textContent=c.reviews.length;
+  document.getElementById('ch-pending').textContent=c.reviews.filter(r=>r.status==='pending').length;
+  document.getElementById('ch-published').textContent=c.reviews.filter(r=>r.status==='done').length;
+  document.getElementById('cfg-name').value=c.name;
+  document.getElementById('cfg-sector').value=c.sector;
+  document.getElementById('cfg-tone').value=c.tone;
+  document.getElementById('cfg-instructions').value=c.instructions||'';
+  renderReviews(c);renderHistory(c);renderSidebar();
+}
+
+function renderReviews(c){
+  const panel=document.getElementById('reviewItems');
+  if(c.reviews.length===0){panel.innerHTML='<div style="text-align:center;padding:40px 20px;color:var(--muted);font-size:13px">Aucun avis — simulez-en un avec le bouton ci-dessus</div>';return;}
+  panel.innerHTML=c.reviews.map(r=>{
+    const cls=r.stars>=4?'pos':r.stars<=2?'neg':'mid';
+    const statusCls=r.status==='done'?'chip-done':r.stars<=2?'chip-neg':'chip-wait';
+    const statusTxt=r.status==='done'?'✓ Publié':r.stars<=2?'⚠ Négatif':'⏳ En attente';
+    const stars='★'.repeat(r.stars)+'☆'.repeat(5-r.stars);
+    const avatarColor=r.stars>=4?'background:rgba(0,229,160,.15);color:var(--accent)':r.stars<=2?'background:rgba(255,59,92,.15);color:var(--red)':'background:rgba(245,200,66,.15);color:var(--gold)';
+    const initial=r.author[0].toUpperCase();
+    const responseHtml=r.response?`<div class="r-response open"><div class="r-response-label">Réponse IA ${r.status==='done'?'· publiée':'· générée'}</div><div class="r-response-text">${escHtml(r.response)}</div></div>`:'';
+    const actionsHtml=r.status==='done'
+      ?`<span style="font-size:11px;color:var(--accent)">✓ Réponse publiée sur Google</span>`
+      :r.response
+        ?`<div class="r-actions"><button class="ra-btn ra-publish" onclick="publishReview(${r.id})">✓ Publier</button><button class="ra-btn ra-regen" onclick="generateForReview(${r.id})">↺ Regénérer</button><button class="ra-btn ra-edit" onclick="editReview(${r.id})">✏ Modifier</button></div>`
+        :`<div class="r-actions"><button class="ra-btn ra-generate" onclick="generateForReview(${r.id})">✦ Générer la réponse</button></div>`;
+    return `<div class="r-item ${cls}${r.status==='done'?' done':''}" id="ri-${r.id}">
+      <div class="r-top" onclick="toggleReview(${r.id})">
+        <div class="r-avatar" style="${avatarColor}">${initial}</div>
+        <div class="r-info"><div class="r-author">${r.author}</div><div class="r-stars-date"><span style="color:var(--gold);font-size:12px">${stars}</span><span class="r-date">${r.date}</span></div></div>
+        <div class="r-status-chip ${statusCls}">${statusTxt}</div>
+      </div>
+      <div class="r-body open" id="rb-${r.id}">
+        <div class="r-text">${escHtml(r.text)}</div>
+        <div class="loading-strip" id="ls-${r.id}"><div class="loading-fill"></div></div>
+        <div id="rr-${r.id}">${responseHtml}</div>
+        <div id="ra-${r.id}">${actionsHtml}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderHistory(c){
+  const hist=c.reviews.filter(r=>r.status==='done'&&r.response);
+  const el=document.getElementById('historyList');
+  if(hist.length===0){el.innerHTML='<div style="font-size:12px;color:var(--muted);padding:8px 0">Aucune réponse publiée</div>';return;}
+  el.innerHTML=hist.map(r=>`<div class="hist-item"><div class="hist-author">${r.author} · ${'★'.repeat(r.stars)}</div><div class="hist-resp">${escHtml(r.response)}</div><div class="hist-date">${r.date}</div></div>`).join('');
+}
+
+function toggleReview(id){document.getElementById(`rb-${id}`).classList.toggle('open');}
+
+async function generateForReview(reviewId){
+  const c=db.clients.find(x=>x.id===activeClientId);
+  if(!c)return;
+  const r=c.reviews.find(x=>x.id===reviewId);
+  if(!r)return;
+  const ls=document.getElementById(`ls-${reviewId}`);
+  const rrEl=document.getElementById(`rr-${reviewId}`);
+  const raEl=document.getElementById(`ra-${reviewId}`);
+  ls.classList.add('on');
+  rrEl.innerHTML='';raEl.innerHTML='';
+
+  // Simule un délai réaliste
+  await new Promise(res=>setTimeout(res, 900 + Math.random()*600));
+
+  const text = getDemoResponse(r, c);
+  ls.classList.remove('on');
+  r.response=text;
+  saveData();
+
+  rrEl.innerHTML=`<div class="r-response open"><div class="r-response-label">Réponse IA générée <span style="color:var(--gold);font-size:9px;margin-left:6px">MODE DÉMO</span></div><div class="r-response-text typing" id="rt-${reviewId}"></div></div>`;
+  raEl.innerHTML=`<div class="r-actions"><button class="ra-btn ra-publish" onclick="publishReview(${reviewId})">✓ Publier</button><button class="ra-btn ra-regen" onclick="generateForReview(${reviewId})">↺ Regénérer</button><button class="ra-btn ra-edit" onclick="editReview(${reviewId})">✏ Modifier</button></div>`;
+
+  let i=0;
+  const el=document.getElementById(`rt-${reviewId}`);
+  const iv=setInterval(()=>{
+    if(!el){clearInterval(iv);return;}
+    el.textContent=text.slice(0,i);
+    i+=4;
+    if(i>text.length){el.textContent=text;el.classList.remove('typing');clearInterval(iv);}
+  },16);
+}
+
+async function generateAllPending(){
+  const c=db.clients.find(x=>x.id===activeClientId);
+  if(!c)return;
+  const pending=c.reviews.filter(r=>r.status==='pending'&&!r.response);
+  if(pending.length===0){showToast('✓','Tous les avis ont déjà une réponse');return;}
+  showToast('⚡',`Génération pour ${pending.length} avis...`);
+  for(const r of pending){await generateForReview(r.id);await new Promise(res=>setTimeout(res,600));}
+  showToast('✦','Toutes les réponses ont été générées !');
+}
+
+function publishReview(reviewId){
+  const c=db.clients.find(x=>x.id===activeClientId);
+  const r=c.reviews.find(x=>x.id===reviewId);
+  r.status='done';saveData();
+  openClient(activeClientId);renderDashboard();
+  showToast('✓','Réponse marquée comme publiée sur Google');
+}
+
+function editReview(reviewId){
+  const c=db.clients.find(x=>x.id===activeClientId);
+  const r=c.reviews.find(x=>x.id===reviewId);
+  const rrEl=document.getElementById(`rr-${reviewId}`);
+  const raEl=document.getElementById(`ra-${reviewId}`);
+  rrEl.innerHTML=`<div class="r-response open"><div class="r-response-label">Modifier la réponse</div><textarea class="form-ta" id="edit-ta-${reviewId}" style="height:100px">${escHtml(r.response)}</textarea></div>`;
+  raEl.innerHTML=`<div class="r-actions"><button class="ra-btn ra-publish" onclick="saveEdit(${reviewId})">💾 Enregistrer</button><button class="ra-btn ra-edit" onclick="openClient(${activeClientId})">Annuler</button></div>`;
+}
+
+function saveEdit(reviewId){
+  const c=db.clients.find(x=>x.id===activeClientId);
+  const r=c.reviews.find(x=>x.id===reviewId);
+  const ta=document.getElementById(`edit-ta-${reviewId}`);
+  if(ta){r.response=ta.value;saveData();}
+  openClient(activeClientId);showToast('💾','Réponse modifiée');
+}
+
+function saveClientConfig(){
+  const c=db.clients.find(x=>x.id===activeClientId);
+  if(!c)return;
+  c.name=document.getElementById('cfg-name').value;
+  c.sector=document.getElementById('cfg-sector').value;
+  c.tone=document.getElementById('cfg-tone').value;
+  c.instructions=document.getElementById('cfg-instructions').value;
+  saveData();renderSidebar();showToast('⚙️','Configuration enregistrée');
+}
+
+function deleteClient(id){
+  if(!confirm('Supprimer ce client et tous ses avis ?'))return;
+  db.clients=db.clients.filter(c=>c.id!==id);saveData();
+  if(activeClientId===id){activeClientId=null;document.getElementById('tab-client').style.display='none';showView('dashboard');}
+  renderSidebar();renderDashboard();showToast('🗑','Client supprimé');
+}
+
+function openModal(){document.getElementById('modalBg').classList.add('open');}
+function closeModal(){document.getElementById('modalBg').classList.remove('open');}
+
+function saveNewClient(){
+  const name=document.getElementById('new-name').value.trim();
+  if(!name){showToast('⚠','Le nom est obligatoire');return;}
+  const client={id:db.nextClientId++,name,sector:document.getElementById('new-sector').value||'Non renseigné',city:document.getElementById('new-city').value||'',note:parseFloat(document.getElementById('new-note').value)||0,tone:document.getElementById('new-tone').value,instructions:document.getElementById('new-instructions').value,reviews:[]};
+  db.clients.push(client);saveData();closeModal();renderSidebar();renderDashboard();openClient(client.id);
+  showToast('✓',`Client "${name}" ajouté`);
+}
+
+const fakeReviews=[
+  {stars:5,authors:["Thomas Klein","Marie Dubois","Pierre Martin","Sophie Bernard"],texts:["Excellent praticien ! Résultats incroyables dès la première séance. Je recommande vivement.","Très professionnel et à l'écoute. Ma douleur chronique a enfin disparu après des années de galère.","Service exceptionnel. Ponctuel, efficace, bienveillant. Je suis conquis."]},
+  {stars:4,authors:["Isabelle Schmitt","Robert Muller","Claire Weber"],texts:["Très bien dans l'ensemble, quelques petits ajustements à faire mais l'essentiel est là.","Bonne expérience, praticien compétent. Je reviendrai."]},
+  {stars:2,authors:["Anonyme","Un client","Marc D."],texts:["Déçu par le retard et le manque de communication. La technique est correcte mais l'organisation laisse à désirer.","Résultat moyen pour le prix demandé."]}
+];
+
+function addFakeReview(){
+  const c=db.clients.find(x=>x.id===activeClientId);
+  if(!c)return;
+  const rand=Math.random();
+  let pool=rand>0.6?fakeReviews[0]:rand>0.2?fakeReviews[1]:fakeReviews[2];
+  const review={id:db.nextReviewId++,author:pool.authors[Math.floor(Math.random()*pool.authors.length)],date:"À l'instant",stars:pool.stars,text:pool.texts[Math.floor(Math.random()*pool.texts.length)],status:"pending",response:""};
+  c.reviews.unshift(review);saveData();openClient(activeClientId);showToast('⭐','Nouvel avis simulé ajouté');
+}
+
+function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function showToast(icon,msg){const t=document.getElementById('toast');document.getElementById('ti').textContent=icon;document.getElementById('tm').textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);}
+
+renderSidebar();renderDashboard();
+
+if('serviceWorker' in navigator){
+  const swCode=`const CACHE='zylolab-v1';self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['/'])));self.skipWaiting();});self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))));self.clients.claim();});self.addEventListener('fetch',e=>{if(e.request.url.includes('fonts.googleapis'))return;e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).catch(()=>caches.match('/'))));});`;
+  const blob=new Blob([swCode],{type:'application/javascript'});
+  navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(()=>{});
+}
+
+let deferredPrompt=null;
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault();deferredPrompt=e;
+  const btn=document.createElement('button');
+  btn.className='mini-btn primary';
+  btn.style.cssText='font-size:12px;padding:6px 14px;animation:pulse 2s infinite';
+  btn.textContent='📲 Installer l\'app';
+  btn.onclick=async()=>{
+    deferredPrompt.prompt();
+    const{outcome}=await deferredPrompt.userChoice;
+    if(outcome==='accepted'){btn.textContent='✓ Installée !';setTimeout(()=>btn.remove(),2000);}
+    deferredPrompt=null;
+  };
+  document.querySelector('.topbar-right').prepend(btn);
+});
+
+const isIos=/iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase());
+const isStandalone=window.navigator.standalone;
+if(isIos&&!isStandalone){
+  const tip=document.createElement('div');
+  tip.style.cssText='position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:#1e1e2a;border:1px solid rgba(0,229,160,.3);border-radius:10px;padding:12px 20px;font-size:12px;color:#e8e4f0;z-index:999;text-align:center;max-width:300px;box-shadow:0 8px 32px rgba(0,0,0,.5)';
+  tip.innerHTML='📲 Pour installer : appuyez sur <strong style="color:#00e5a0">Partager</strong> puis <strong style="color:#00e5a0">Sur l\'écran d\'accueil</strong>';
+  const close=document.createElement('div');
+  close.textContent='✕';close.style.cssText='position:absolute;top:8px;right:10px;cursor:pointer;color:#5a5870;font-size:14px';
+  close.onclick=()=>tip.remove();tip.appendChild(close);document.body.appendChild(tip);
+  setTimeout(()=>tip.remove(),8000);
+}
+</script>
+</body>
+</html>
